@@ -21,7 +21,7 @@ LiquidCrystal lcd = LiquidCrystal(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("lolxd");
+  //Serial.println("lolxd");
   pinMode(BUTTON_PIN, INPUT);
   lcd.begin(16,2);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonPress, RISING);
@@ -87,5 +87,3 @@ void buttonPress() {
       break;
   }
 }
-
-
