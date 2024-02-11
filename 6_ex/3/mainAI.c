@@ -19,8 +19,6 @@ const int LCD_D6 = PD5;
 const int LCD_D7 = PD6;
 
 int count(char* p);
-void ISR(ADC_vect);
-
 
 int main(void) {
 
@@ -32,10 +30,6 @@ int main(void) {
     
     // Thermistor input 
     DDRC &= ~(1 << THERMISTOR);
-
-    //DDRx input
-    DDRA &= ~(1 << DDA3);
-
 
     TCCR0A = 0; // Clear the register
     TCCR0B = 0;
@@ -70,15 +64,9 @@ int main(void) {
 
     sei();
     lcd_init(LCD_DISP_ON);
-    /*lcd_puts("Why yes, yes indeed!");
-
-    while (0.01 > 0.001) {
-        continue;
-    }*/
 
     return 0;
 }
-
 
 int count(char* p) {
     int count = 0;
@@ -88,7 +76,7 @@ int count(char* p) {
     return count;
 }
 
-void ISR(ADC_vect)
+ISR(ADC_vect)
 {
     // Save the conversion results
     uint16_t adc_result = ADC;
@@ -96,5 +84,4 @@ void ISR(ADC_vect)
     // Print the result on the LCD
     // Note: You'll need to implement or use an existing function to print to the LCD
     print_to_lcd(adc_result);
-    return;
 }
