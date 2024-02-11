@@ -34,7 +34,7 @@ int main(void) {
     TCCR0A = 0; // Clear the register
     TCCR0B = 0;
     TCCR0A |= (1 << WGM01);
-
+    TCNT0 = 0;
     // Set the TOP to be 255
     OCR0A = 255;
 
@@ -74,6 +74,12 @@ int count(char* p) {
         count++;
     }
     return count;
+}
+
+void print_to_lcd(uint16_t result) {
+    char buffer[10];
+    itoa(result, buffer, 10); // Convert the result to string
+    lcd_puts(buffer); // Display the result on the LCD
 }
 
 ISR(ADC_vect)
