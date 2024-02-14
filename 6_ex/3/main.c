@@ -74,6 +74,27 @@ int main(void) {
     // Set prescaling to 1024
     TCCR0B |= (1 << CS02) | (1 << CS00);
 
+    //DDRx input
+    DDRA &= ~(1 << DDA3);
+
+
+    TCCR0A = 0; // Clear the register
+    TCCR0B = 0;
+    TCCR0A |= (1 << WGM01);
+
+    // Set the TOP to be 255
+    OCR0A = 255;
+
+    // Set compare match on the compare register A (OC0A)
+    // Use toggle output on match compare
+    TCCR0A |= (1 << COM0A0);
+
+    // Try different prescalers in the TCCR0B
+    // For example, set prescaler to 64
+    TCCR0B |= (1 << CS01) | (1 << CS00);
+
+    // Enable the interrupt in TIMSK0
+    TIMSK0 |= (1 << OCIE0A);
 
     /*
     - To set up the ADC you will need to use the ADC multiplexer selection register 
@@ -102,12 +123,27 @@ int main(void) {
     sei();
     
     lcd_init(LCD_DISP_ON);
+
     
     // reset the timer/counter0 in the main(void) before while(1).
     TCNT0 = 0;
     
+
+    // For example, use AVCC as voltage reference and ADC3 as input channel
+    ADMUX |= (1 << REFS0) | (1 << MUX1) | (1 << MUX0);
+
+    // Enable the ADC, auto triggering, and the ADC interrupt
+    ADCSRA = (1 << ADEN) | (1 << ADATE) | (1 << ADIE);
+
+    // Set the auto trigger source (timer/counter0 compare match A)
+    ADCSRB = (1 << ADTS1) | (1 << ADTS0);
+
+    sei();
+    lcd_init(LCD_DISP_ON);
+
     while(1) {
-        continue;
+          continue;
+
     }
     
     return 0;
