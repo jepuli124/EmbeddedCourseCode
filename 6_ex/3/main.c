@@ -60,7 +60,7 @@ int main(void) {
     
     TCCR0A = 0;
     TCCR0B = 0;
-    TCNT0 = 0;
+  
     
     // WGM01 -> Set the operation mode to clear timer on compare CTC.
     // COM0A0 -> Toggle OC0A on Compare Match  |  Use toggle output on match compare. 
@@ -77,7 +77,6 @@ int main(void) {
     // Set prescaling to 1024
     TCCR0B |= (1 << CS02) | (1 << CS00);
 
-
     /*
     - To set up the ADC you will need to use the ADC multiplexer selection register 
         (ADMUX) to select voltage reference and input channel.
@@ -87,8 +86,7 @@ int main(void) {
         to set the auto trigger source (timer/counter0 compare match A).
 
     */
-
-
+  
     ADMUX = 0;
     
     // REFS0 -> AV_cc | MUX1, MUX0 -> Analog Channel 3 pin A3
@@ -100,15 +98,12 @@ int main(void) {
     ADCSRB = 0;
     // Timer0 compare match A | 0 1 1
     ADCSRB |= (1 << ADTS1) | (1 << ADTS0);
- 
-    // To enable the micro-controllers interrupts use sei().
+
     sei();
-    
-    
-    // reset the timer/counter0 in the main(void) before while(1).
     TCNT0 = 0;
     
     while(1) {
+
         if (is_timer_Ready) {
             lcd_gotoxy(0,0);
             is_timer_Ready = 0;
@@ -119,6 +114,7 @@ int main(void) {
             lcd_puts(buf);
             adc = 0;
         }
+
     }
     
     return 0;
