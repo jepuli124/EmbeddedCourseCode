@@ -1,8 +1,8 @@
 # Parameters:
 F_CPU=16000000UL
 
-MCU=atmega328p # With atmega 2560 MCU -> atmega2560
-#MCU=atmega2560 # With atmega 2560 MCU -> atmega2560
+MCU=atmega328p 
+#MCU=atmega2560 
 
 PROGRAMMER=arduino
 #PROGRAMMER=wiring
@@ -25,7 +25,7 @@ AVRDUDE=avrdude -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD)
 # Target for all:
 all: $(TARGET).hex upload clean
 
-# Compilation process
+# Compilation process   > LCD Library <
 $(TARGET).hex:$(TARGET).c lcd.o
 	$(CC) $(CFLAGS) -o $(TARGET).elf $(TARGET).c lcd.o
 	avr-objcopy -O ihex -R .eeprom $(TARGET).elf $(TARGET).hex
@@ -34,13 +34,14 @@ $(TARGET).hex:$(TARGET).c lcd.o
 upload: $(TARGET).hex
 	$(AVRDUDE) -U flash:w:$(TARGET).hex:i
 
+# MEGA 	Option -D
 
 # Tidying folder
 clean:
 	rm -f $(TARGET).elf $(TARGET).hex lcd.o
 
+## LCD library
 lcd.o: lcd.c lcd.h
 	$(CC) $(CFLAGS) -c lcd.c -o lcd.o
 
-# run "make all" to run compilation, upload and clean
 
