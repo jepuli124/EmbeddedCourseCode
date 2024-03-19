@@ -1,6 +1,6 @@
 #define F_CPU 16000000UL
 
-#define FOSC 16000000
+#define FOSC 16000000UL
 #define BAUD 9600
 #define MYUBRR FOSC/16/BAUD-1
 
@@ -13,21 +13,20 @@
 
 const int LED_BUILTIN = PB5;
 
+static int uart_putchar(char c, FILE* stream);
+
 static int uart_putchar(char c, FILE *stream) {
     if (c == '\n') {
         uart_putchar('\r', stream);
     }
-    loop_until_bit_is_set(UCSRA, UDRE);
-    UDR = c;
+    loop_until_bit_is_set(UCSR0A, UDRE0);
+    UDR0 = c;
     return 0;
 }
 
-static int uart_readchar(FILE *stream) {
 
-}
 // Setup write and read
-static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
-static FILE mystdin = FDEV_SETUP_STREAM(NULL, uart_readchar, _FDEV_SETUP_READ);
+static FILE mystdout = FDEV_SETUP_STREAM(NULL, NULL, _FDEV_SETUP_WRITE);
 
 
 void USART_Init(unsigned int ubrr) {
@@ -38,16 +37,16 @@ void USART_Init(unsigned int ubrr) {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0);
     // Frame format 8b data 2b stop
     UCSR0C = (1 << USBS0) | (3 << UCSZ00);
+    PORTB &= ~(1 << LED_BUILTIN);
 }
-
 
 int main(void) {
 
-    USART_Init();
+    DDRB |= (1 << LED_BUILTIN);
 
-    init_uart();
+    USART_Init(MYUBRR);
+
     stdout = &mystdout;
-    stdin = &mystdin;
 
     printf("Hello world!\n");
     
