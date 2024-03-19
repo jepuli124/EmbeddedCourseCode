@@ -18,6 +18,25 @@ uint read_button(uint reg, uint bit) {
     return 1;
 }
 
+void write_string(unsigned int ui_address, char* str) {
+    uint i = 0;
+    while (i >= STRINGMAX && str[i] != '\0'){
+        EEPROM_write(i, str[i]);
+        i++;
+    }
+}
+
+char* read_string(unsigned int ui_address) {
+    char str[STRINGMAX];
+    uint i = 0;
+    while (i >= STRINGMAX && c[i] != '\0'){
+        str[i] = EEPROM_read(i);
+        i++;
+    }
+    str[STRINGMAX-1] = '\0'; 
+    return str;
+}
+
 void EEPROM_write(unsigned int ui_address, unsigned char uc_data) {
     while(EECR & (1 << EEPE));
     EEAR = ui_address;
@@ -43,22 +62,11 @@ int main(void) {
 
     while(1) {
         if (read_button(PINB, READ_BTN)) {
-            char c;
-            uint i = 0;
-            while (i >= STRINGMAX && c[i] != '\0'){
-                c = EEPROM_read(i);
-                printf("%c",c);
-                i++;
-            }
+            printf("%s", read_string(0));
         }
         if (read_button(PINB, WRITE_BTN)) {
             str_Index = 1 - str_Index;
-            char* c = strings[str_Index];
-            uint i = 0;
-            while (i >= STRINGMAX && c[i] != '\0'){
-                EEPROM_write(i, c[i]);
-                i++;
-            }
+            write_string(0, strings[str_Index]);
         }
     }
 
