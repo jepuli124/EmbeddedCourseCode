@@ -65,7 +65,7 @@ int main(void) {
             printf("%s", read_string(0));
         }
         if (read_button(PINB, WRITE_BTN)) {
-            str_Index = 1 - str_Index;
+            str_Index ^= 1;
             write_string(0, strings[str_Index]);
         }
     }
