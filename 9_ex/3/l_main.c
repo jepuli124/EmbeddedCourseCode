@@ -36,7 +36,7 @@ unsigned char EEPROM_read(unsigned int ui_address) {
 }
 
 int main(void) {
-    DDRB &= ~((1 << READ_BTN) & (1 << WRITE_BTN));
+    DDRB &= ~((1 << READ_BTN) | (1 << WRITE_BTN));
 
     while(1) {
         if (read_button(PINB, READ_BTN)) {
