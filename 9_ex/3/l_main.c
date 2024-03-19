@@ -11,11 +11,11 @@ const int READ_BTN = PB1;
 const int WRITE_BTN = PB2;
 
 
-bool read_button(uint reg, uint bit) {
+uint read_button(uint reg, uint bit) {
     for(int i = 0; i < 1000; i++) {
-        if (reg & (1 << bit)){ return false };
+        if (reg & (1 << bit)){ return 0 };
     }
-    return true;
+    return 1;
 }
 
 void EEPROM_write(unsigned int ui_address, unsigned char uc_data) {
