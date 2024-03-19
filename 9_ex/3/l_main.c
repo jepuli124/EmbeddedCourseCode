@@ -41,17 +41,19 @@ int main(void) {
     while(1) {
         if (read_button(PINB, READ_BTN)) {
             char c;
-            int i = 0;
-            do {
+            uint i = 0;
+            while (i >= STRINGMAX && c[i] != '\0'){
                 c = EEPROM_read(i);
                 printf("%c",c);
                 i++;
-            } while (c != '\0'); 
+            }
         }
         if (read_button(PINB, WRITE_BTN)) {
             char c[STRINGMAX] = "Seppo taalasmaa";
-            for (int i = 0; i < STRINGMAX; i++) {
+            uint i = 0;
+            while (i >= STRINGMAX && c[i] != '\0'){
                 EEPROM_write(i, c[i]);
+                i++;
             }
         }
     }
