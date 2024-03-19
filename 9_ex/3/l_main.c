@@ -38,6 +38,9 @@ unsigned char EEPROM_read(unsigned int ui_address) {
 int main(void) {
     DDRB &= ~((1 << READ_BTN) | (1 << WRITE_BTN));
 
+    char* strings[2][STRINGMAX] = {"Seppo Taalasmaa", "Ismo Laitela"};
+    uint str_Index = 0;
+
     while(1) {
         if (read_button(PINB, READ_BTN)) {
             char c;
@@ -49,7 +52,8 @@ int main(void) {
             }
         }
         if (read_button(PINB, WRITE_BTN)) {
-            char c[STRINGMAX] = "Seppo taalasmaa";
+            str_Index = 1 - str_Index;
+            char* c = strings[str_Index];
             uint i = 0;
             while (i >= STRINGMAX && c[i] != '\0'){
                 EEPROM_write(i, c[i]);
