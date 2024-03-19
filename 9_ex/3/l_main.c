@@ -13,7 +13,7 @@ const int WRITE_BTN = PB2;
 
 uint read_button(uint reg, uint bit) {
     for(int i = 0; i < 1000; i++) {
-        if (reg & (1 << bit)){ return 0 };
+        if (!(reg & (1 << bit))){ return 0 };
     }
     return 1;
 }
