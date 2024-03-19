@@ -37,7 +37,7 @@ upload: $(TARGET).hex
 
 # Tidying folder
 clean:
-	rm -f $(TARGET).elf $(TARGET).hex lcd.o
+	rm -f $(TARGET).elf $(TARGET).hex
 
 
 # run "make all" to run compilation, upload and clean

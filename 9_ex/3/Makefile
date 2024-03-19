@@ -26,8 +26,8 @@ AVRDUDE=avrdude -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD)
 all: $(TARGET).hex upload clean
 
 # Compilation process
-$(TARGET).hex:$(TARGET).c lcd.o
-	$(CC) $(CFLAGS) -o $(TARGET).elf $(TARGET).c lcd.o
+$(TARGET).hex:$(TARGET).c
+	$(CC) $(CFLAGS) -o $(TARGET).elf $(TARGET).c
 	avr-objcopy -O ihex -R .eeprom $(TARGET).elf $(TARGET).hex
 
 # Bit banging
@@ -37,10 +37,6 @@ upload: $(TARGET).hex
 
 # Tidying folder
 clean:
-	rm -f $(TARGET).elf $(TARGET).hex lcd.o
-
-lcd.o: lcd.c lcd.h
-	$(CC) $(CFLAGS) -c lcd.c -o lcd.o
-
+	rm -f $(TARGET).elf $(TARGET).hex
 # run "make all" to run compilation, upload and clean
 

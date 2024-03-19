@@ -1,79 +1,54 @@
 #define F_CPU 16000000UL
+#define STRINGMAX 32
 
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdlib.h>
 
-#include "lcd.h"
 
-int LED_BUILTIN = PB5;
+const int LED_BUILTIN = PB5;
+const int READ_BTN = PB1;
+const int WRITE_BTN = PB2;
 
-int LCD_RS = PB1;
-int LCD_RW = PB2;
-int LCD_EN = PB3;
 
-int LCD_D4 = PD3;
-int LCD_D5 = PD4;
-int LCD_D6 = PD5;
-int LCD_D7 = PD6;
+void EEPROM_write(unsigned int ui_address, unsigned char uc_data) {
+    while(EECR & (1 << EEPE));
+    EEAR = ui_address;
+    EEDR = uc_data;
+    EECR |= (1 << EEMPE);
+    EECR |= (1 << EEPE);
+}
 
-int count(char* p);
+
+unsigned char EEPROM_read(unsigned int ui_address) {
+    
+    while(EECR & (1 << EEPE));
+    EEAR = ui_address;
+    EECR |= (1 << EERE);
+    return EEDR;
+}
 
 int main(void) {
+    DDRB &= ~(1 << READ_BTN) & (1 << WRITE_BTN);
 
-    // OUTPUTS CONTROL
-    DDRB |= (1<<LCD_RS) | (1 << LCD_RW ) | (1 << LCD_EN ); 
-    // OUTPUTS DATA
-    DDRD |= (1 << LCD_D4 )| (1 << LCD_D5 )| (1 << LCD_D6 )| (1 << LCD_D7 );
-    
-    lcd_init(LCD_DISP_ON);
-    
-    char testBar[] = "-_-_-*-_-_-";
-    int n = count(testBar);
-    int rots = 0;
-    
-    int8_t test_8_Bit = 2024; // Overflow -> -24
-    int16_t test_16_bit = 25050;
-    char buf[16];
-
-    lcd_puts("Hello There!");
-    _delay_ms(1500);
-
-    lcd_clrscr();
-
-    while (0.01 > 0.001) {
-        lcd_gotoxy(0,0);
-        for (size_t i = 0; i < n; i++) {
-            lcd_putc(testBar[i]);
-            _delay_ms(200);
+    while(1) {
+        if (PINB & (1 << READ_BTN)) {
+            char c;
+            int i = 0;
+            do {
+                c = EEPROM_read(i);
+                printf("%c",c);
+                i++;
+            } while (c != '\0'); 
         }
-        lcd_clrscr();
-        
-        lcd_clrscr();
-        rots = (rots == 4) ? 0 : ++rots;
-    
-        itoa(test_16_bit, buf, 10);
-        lcd_gotoxy(rots,0); // Writes test_16_bit to first line
-        lcd_puts("16_In:");
-        lcd_puts(buf);
-        
-        itoa(test_8_Bit, buf, 10); 
-        lcd_gotoxy(rots,1); // Writes test_8_bit to second line start
-        lcd_puts("8_Over:");
-        lcd_puts(buf);
-        
-        _delay_ms(2000);
-        lcd_clrscr();
+        if (PINB & (1 << WRITE_BTN)) {
+            char c[STRINGMAX] = "Seppo taalasmaa";
+            for (int i = 0; i < STRINGMAX; i++) {
+                EEPROM_write(i, c[i]);
+            }
+        }
     }
 
     return 0;
 }
 
-
-int count(char* p) {
-    int count = 0;
-    while(p[count] != '\0') {
-        count++;
-    }
-    return count;
-}

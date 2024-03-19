@@ -14,8 +14,9 @@
 const int LED_BUILTIN = PB5;
 
 static int uart_putchar(char c, FILE* stream);
+static int uart_readchar(FILE* stream);
 
-static int uart_putchar(char c, FILE *stream) {
+static int uart_putchar(char c, FILE* stream) {
     if (c == '\n') {
         uart_putchar('\r', stream);
     }
@@ -24,9 +25,12 @@ static int uart_putchar(char c, FILE *stream) {
     return 0;
 }
 
+static int uart_readchar(FILE* stream) {
+}
 
 // Setup write and read
-static FILE mystdout = FDEV_SETUP_STREAM(NULL, NULL, _FDEV_SETUP_WRITE);
+static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+static FILE mystdin = FDEV_SETUP_STREAM(NULL, uart_readchar, _FDEV_SETUP_READ);
 
 
 void USART_Init(unsigned int ubrr) {
@@ -37,19 +41,28 @@ void USART_Init(unsigned int ubrr) {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0);
     // Frame format 8b data 2b stop
     UCSR0C = (1 << USBS0) | (3 << UCSZ00);
-    PORTB &= ~(1 << LED_BUILTIN);
+    // PORTB &= ~(1 << LED_BUILTIN);
 }
 
 int main(void) {
 
     DDRB |= (1 << LED_BUILTIN);
+    PORTB |= (1 << LED_BUILTIN);
 
     USART_Init(MYUBRR);
 
     stdout = &mystdout;
+    stdin = &mystdin;
 
-    printf("Hello world!\n");
-    
+    while(12) {
+        fprintf(stdin, "%s\n", "Hello world!");
+        printf("Hello there!");
+        PORTB &= ~(1 << LED_BUILTIN);
+        _delay_ms(250);
+        PORTB |= (1 << LED_BUILTIN);
+        _delay_ms(250);
+    }
+
     return 0;
 }
 
