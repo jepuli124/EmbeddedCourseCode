@@ -11,6 +11,13 @@ const int READ_BTN = PB1;
 const int WRITE_BTN = PB2;
 
 
+bool read_button(uint reg, uint bit) {
+    for(int i = 0; i < 1000; i++) {
+        if (reg & (1 << bit)){ return false };
+    }
+    return true;
+}
+
 void EEPROM_write(unsigned int ui_address, unsigned char uc_data) {
     while(EECR & (1 << EEPE));
     EEAR = ui_address;
@@ -32,7 +39,7 @@ int main(void) {
     DDRB &= ~(1 << READ_BTN) & (1 << WRITE_BTN);
 
     while(1) {
-        if (PINB & (1 << READ_BTN)) {
+        if (read_button(PINB, READ_BTN)) {
             char c;
             int i = 0;
             do {
@@ -41,7 +48,7 @@ int main(void) {
                 i++;
             } while (c != '\0'); 
         }
-        if (PINB & (1 << WRITE_BTN)) {
+        if (read_button(PINB, WRITE_BTN)) {
             char c[STRINGMAX] = "Seppo taalasmaa";
             for (int i = 0; i < STRINGMAX; i++) {
                 EEPROM_write(i, c[i]);
