@@ -3,7 +3,7 @@
 #define FOSC 16000000UL
 #define BAUD 9600
 #define MYUBRR FOSC/16/BAUD-1
-#define NOTE_C5 523
+#define NOTE_C5 523 
 #define NOTE_A7 3520
 #define NOTE_B2 123
 
@@ -15,8 +15,17 @@
 #include <avr/interrupt.h>
 
 const int LED_BUILTIN = PB5;
+
+/*------------------------------*/
+// BUZZER SETUP 
+/*-----------------------------*/
+
 const int PRESCALER_64 = 64;
 const int PRESCALER_1 = 1;
+
+/*------------------------------*/
+// USART SETUP 
+/*-----------------------------*/
 
 static int uart_putchar(char c, FILE* stream);
 static int uart_readchar(FILE* stream);
@@ -49,15 +58,46 @@ void USART_Init(unsigned int ubrr) {
     // PORTB &= ~(1 << LED_BUILTIN);
 }
 
+/*------------------------------*/
+// TIMER SETUP 
+/*-----------------------------*/
+
+volatile short is_timer_Ready = 0;
+volatile uint16_t adc = 0; 
+
+// When the ADC is complete, print the result in the LCD.
+// You can save the conversion results in the ISR(interrupt_vector) sub-routine 
+ISR(ADC_vect)
+{
+    // Debugging led
+    PORTB ^= (1 << BUILTIN);
+    is_timer_Ready = 1;
+    adc = ADC;
+}
+
+/*------------------------------*/
+// MAIN LOOP 
+/*-----------------------------*/
+
+
 int main(void) {
 
     DDRB |= (1 << LED_BUILTIN);
     PORTB |= (1 << LED_BUILTIN);
 
+    /*------------------------------*/
+    // USART ? SETUP 
+    /*-----------------------------*/
+
     USART_Init(MYUBRR);
 
     stdout = &mystdout;
     stdin = &mystdin;
+
+
+    /*------------------------------*/
+    // BUZZER SETUP 
+    /*-----------------------------*/
 
     TCCR1B = 0;
     OCR1A = 0;
@@ -76,12 +116,45 @@ int main(void) {
     // Enable COMPA interrupt
     TIMSK1 = (1 << OCIE1A);
 
-
-    // Toggling builtin led works, lower note -> lower light output,
-    //     higher note -> higher light output
-    // Sets the 
     TCNT1 = 0;
     
+
+    /*------------------------------*/
+    // TIMER SETUP 
+    /*-----------------------------*/
+
+    TCCR0A = 0;
+    TCCR0B = 0;
+  
+    // WGM01 -> Set the operation mode to clear timer on compare CTC.
+    // COM0A0 -> Toggle OC0A on Compare Match  |  Use toggle output on match compare. 
+    //TCCR0A |= (1 << WGM01) | (1 << COM0A0);
+    
+    TCCR0A = 0x02;
+
+    // Set the TOP to be 255
+    OCR0A = 255;
+    
+    // compare match on the compare register A (OC0A).
+    TIMSK0 |= (1 << OCIE0A);
+    
+    // Set prescaling to 1024
+    TCCR0B |= (1 << CS02) | (1 << CS00);
+
+  
+    ADMUX = 0;
+    
+    // REFS0 -> AV_cc | MUX1, MUX0 -> Analog Channel 3 pin A3
+    ADMUX |= (1 << REFS0) | (1 << MUX1) | (1 << MUX0) ; 
+
+    //         ADC Enable |ADC StartConv| ADC AutoTrig | ADC InterrEn||ADC PreScaler 1 0 1 -> 32 
+    ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE) | (1 << ADIE)  | (1 << ADPS2) | (1 << ADPS0);
+    
+    ADCSRB = 0;
+    // Timer0 compare match A | 0 1 1
+    ADCSRB |= (1 << ADTS1) | (1 << ADTS0);
+
+
 
     sei();
 
@@ -94,7 +167,10 @@ int main(void) {
         _delay_ms(250);
     } */
 
-    
+    /*------------------------------*/
+    // MAIN LOOP 
+    /*-----------------------------*/
+
     int state = 0;
     while (1) {
 
