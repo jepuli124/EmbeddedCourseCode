@@ -82,7 +82,7 @@ ISR(ADC_vect)
 
 
 int main(void) {
-    noInterrupts(); // disable interrupt for the duration of setup
+    //noInterrupts(); // disable interrupt for the duration of setup
     DDRB |= (1 << LED_BUILTIN);
     PORTB |= (1 << LED_BUILTIN);
 
@@ -156,7 +156,7 @@ int main(void) {
 
 
     sei();
-    interrupts(); // enable interrupts back
+    //interrupts(); // enable interrupts back
     /*while(12) {
         fprintf(stdin, "%s\n", "Hello world!");
         printf("Hello there!");
