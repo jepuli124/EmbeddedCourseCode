@@ -63,6 +63,7 @@ void USART_Init(unsigned int ubrr) {
 /*-----------------------------*/
 
 volatile short is_timer_Ready = 1;
+volatile int timeCounter = 0; // in milliseconds
 volatile uint16_t adc = 0; 
 
 // When the ADC is complete, print the result in the LCD.
@@ -71,8 +72,8 @@ ISR(ADC_vect)
 {
     // Debugging led
     //PORTB ^= (1 << BUILTIN);
-    is_timer_Ready = 1;
     adc = ADC;
+    timeCounter++;
 }
 
 /*------------------------------*/
@@ -81,7 +82,7 @@ ISR(ADC_vect)
 
 
 int main(void) {
-
+    noInterrupts(); // disable interrupt for the duration of setup
     DDRB |= (1 << LED_BUILTIN);
     PORTB |= (1 << LED_BUILTIN);
 
@@ -155,7 +156,7 @@ int main(void) {
 
 
     sei();
-
+    interrupts(); // enable interrupts back
     /*while(12) {
         fprintf(stdin, "%s\n", "Hello world!");
         printf("Hello there!");
@@ -177,6 +178,7 @@ int main(void) {
         case 0: // alarm is armed
             if (0) /*movement sensor output detected*/ {
                 state = 2;
+                timeCounter = 0;
                 is_timer_Ready = 0;
             }
             break;
@@ -184,8 +186,9 @@ int main(void) {
             if (0) /*password is correctly inputed*/ {
                 state = 2;
             }
-            if (is_timer_Ready) /*timer ends before correct password is inputed*/ {
+            if (timeCounter >= 10000) /*timer ends before correct password is inputed*/ {
                 state = 3;
+                is_timer_Ready = 1;
             }
             break;
         case 2: // Alarm is disarmed
