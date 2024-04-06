@@ -62,7 +62,7 @@ void USART_Init(unsigned int ubrr) {
 // TIMER SETUP 
 /*-----------------------------*/
 
-volatile short is_timer_Ready = 0;
+volatile short is_timer_Ready = 1;
 volatile uint16_t adc = 0; 
 
 // When the ADC is complete, print the result in the LCD.
@@ -70,7 +70,7 @@ volatile uint16_t adc = 0;
 ISR(ADC_vect)
 {
     // Debugging led
-    PORTB ^= (1 << BUILTIN);
+    //PORTB ^= (1 << BUILTIN);
     is_timer_Ready = 1;
     adc = ADC;
 }
@@ -126,10 +126,6 @@ int main(void) {
     TCCR0A = 0;
     TCCR0B = 0;
   
-    // WGM01 -> Set the operation mode to clear timer on compare CTC.
-    // COM0A0 -> Toggle OC0A on Compare Match  |  Use toggle output on match compare. 
-    //TCCR0A |= (1 << WGM01) | (1 << COM0A0);
-    
     TCCR0A = 0x02;
 
     // Set the TOP to be 255
@@ -154,6 +150,8 @@ int main(void) {
     // Timer0 compare match A | 0 1 1
     ADCSRB |= (1 << ADTS1) | (1 << ADTS0);
 
+    // resets timer counter
+    TCNT1 = 0;
 
 
     sei();
@@ -179,13 +177,14 @@ int main(void) {
         case 0: // alarm is armed
             if (0) /*movement sensor output detected*/ {
                 state = 2;
+                is_timer_Ready = 0;
             }
             break;
         case 1: // movement detected
             if (0) /*password is correctly inputed*/ {
                 state = 2;
             }
-            if (0) /*timer ends before correct password is inputed*/ {
+            if (is_timer_Ready) /*timer ends before correct password is inputed*/ {
                 state = 3;
             }
             break;
