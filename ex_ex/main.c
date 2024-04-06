@@ -85,37 +85,55 @@ int main(void) {
 
     sei();
 
-    while(12) {
+    /*while(12) {
         fprintf(stdin, "%s\n", "Hello world!");
         printf("Hello there!");
         PORTB &= ~(1 << LED_BUILTIN);
         _delay_ms(250);
         PORTB |= (1 << LED_BUILTIN);
         _delay_ms(250);
-    }
+    } */
 
     
-
+    int state = 0;
     while (1) {
-        // Reset to 0 and set prescaler 1
-        TCCR1B = 0;
-        TCCR1B = (1 << CS10) | (1 << WGM13);
+
+        switch (state)
+        {
+        case 0: // alarm is armed
+            if (0) /*movement sensor output detected*/ {
+                state = 2;
+            }
+            break;
+        case 1: // movement detected
+            if (0) /*password is correctly inputed*/ {
+                state = 2;
+            }
+            if (0) /*timer ends before correct password is inputed*/ {
+                state = 3;
+            }
+            break;
+        case 2: // Alarm is disarmed
+            if (0) /*BUTTON IS PRESSED*/ {
+                state = 0;
+            } 
+
+            break;
+        case 3: // Buzzer go brrrrr.
+            TCCR1B = 0;
+            TCCR1B = (1 << CS10) | (1 << WGM13);
+            
+            OCR1A = F_CPU / (2 * PRESCALER_1 * NOTE_C5);
+            _delay_ms(750);
+            state = 2;
+
+            break;
+        default:
+            //we shouldn't be here?
+            state = 2;
+            break;
+        }
         
-        OCR1A = F_CPU / (2 * PRESCALER_1 * NOTE_C5);
-
-        _delay_ms(500);
-
-        OCR1A = F_CPU / (2 * PRESCALER_1 * NOTE_A7);
-
-        _delay_ms(750);
-
-        // Enable the PWM output by setting the clock source (prescaler 64) should
-        // be same as constant PRESCALER64.
-        TCCR1B = (1 << CS11) | (1 << CS10);
-        OCR1A = F_CPU / (2 * PRESCALER_64 * NOTE_B2);
-        
-        _delay_ms(500);
-
     }
 
     return 0;
