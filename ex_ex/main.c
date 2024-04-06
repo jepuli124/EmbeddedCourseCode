@@ -198,11 +198,14 @@ int main(void) {
 
             break;
         case 3: // Buzzer go brrrrr.
+            PORTB &= ~(1 << SS);
             TCCR1B = 0;
             TCCR1B = (1 << CS10) | (1 << WGM13);
             
             OCR1A = F_CPU / (2 * PRESCALER_1 * NOTE_C5);
             _delay_ms(750);
+            
+            PORTB |= ~(1 << SS);
             state = 2;
 
             break;
